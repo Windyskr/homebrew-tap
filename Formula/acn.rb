@@ -3,8 +3,8 @@
 class Acn < Formula
   desc "Agent Completion Notification - AI CLI 任务完成通知（Claude Code / Codex → 飞书）"
   homepage "https://github.com/windyskr/agent-completion-notification"
-  url "https://github.com/windyskr/agent-completion-notification/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "0610142932ac007ea83bd08ba25156f13d7d873e5f4a5754286509f6da4f56ee"
+  url "https://github.com/windyskr/agent-completion-notification/archive/refs/tags/v0.1.1.tar.gz"
+  sha256 "cd17d0edeee47f5d032dbcdd20ea9868492def4ceb9c91e40d57f5cfab3d4d61"
   license "MIT"
   head "https://github.com/windyskr/agent-completion-notification.git", branch: "main"
 
