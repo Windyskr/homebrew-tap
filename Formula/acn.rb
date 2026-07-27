@@ -1,10 +1,10 @@
 # Homebrew Formula。放在 tap 仓库里即可 brew install，或本地：
 #   brew install --build-from-source ./Formula/acn.rb
 class Acn < Formula
-  desc "Agent Completion Notification - AI CLI 任务完成通知（Claude Code / Codex → 飞书）"
+  desc "Agent Completion Notification - Agent 任务完成通知（Claude Code / Codex → 飞书 / Bark）"
   homepage "https://github.com/windyskr/agent-completion-notification"
-  url "https://github.com/windyskr/agent-completion-notification/archive/refs/tags/v0.1.2.tar.gz"
-  sha256 "0a509fad40d9d6578f390d39f61fe292ab5c1940b430b079478b9c0cb1a0bb21"
+  url "https://github.com/windyskr/agent-completion-notification/archive/refs/tags/v0.1.3.tar.gz"
+  sha256 "09baa73da45d18789c5294ca012d1e8fa8666df0c679cb939dda92d0326310b8"
   license "MIT"
   head "https://github.com/windyskr/agent-completion-notification.git", branch: "main"
 
@@ -18,7 +18,8 @@ class Acn < Formula
   def caveats
     <<~EOS
       接入 Claude Code 与 Codex（会自动备份两者的配置）：
-        acn config webhook <飞书机器人地址>
+        acn config feishu-url <飞书机器人地址>
+        # 或：acn config bark-url https://api.day.app/<key>
         acn install
         acn doctor
 
