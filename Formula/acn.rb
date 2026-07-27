@@ -8,6 +8,12 @@ class Acn < Formula
   license "MIT"
   head "https://github.com/windyskr/agent-completion-notification.git", branch: "main"
 
+  bottle do
+    root_url "https://github.com/Windyskr/homebrew-tap/releases/download/acn-0.1.5"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "66a12a927d3061b94cdf1161782beac2d0f401b3c65b92217b38e662c4b4a117"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "742b90d50b553c94510cc226299cde2612ddc488d4c8c06c136954e1114ea298"
+  end
+
   depends_on "go" => :build
 
   def install
