@@ -1,0 +1,111 @@
+name: Update acn
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: update-acn
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Resolve latest release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          tag="$(gh api repos/Windyskr/agent-completion-notification/releases/latest --jq .tag_name)"
+          version="${tag#v}"
+          current_version="$(ruby -ne 'puts $1 if $_ =~ %r{/tags/v([^/]+)\.tar\.gz}' Formula/acn.rb)"
+
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          if [[ "$version" == "$current_version" ]]; then
+            echo "update=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "update=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update formula
+        if: steps.release.outputs.update == 'true'
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          archive="$(mktemp)"
+          curl --fail --location --retry 3 \
+            "https://github.com/Windyskr/agent-completion-notification/archive/refs/tags/${TAG}.tar.gz" \
+            --output "$archive"
+          sha256="$(sha256sum "$archive" | cut -d ' ' -f 1)"
+
+          ruby - Formula/acn.rb "$TAG" "$sha256" <<'RUBY'
+          path, tag, sha256 = ARGV
+          content = File.read(path)
+          content.sub!(
+            %r{url "https://github\.com/windyskr/agent-completion-notification/archive/refs/tags/v[^"]+\.tar\.gz"},
+            %(url "https://github.com/windyskr/agent-completion-notification/archive/refs/tags/#{tag}.tar.gz")
+          )
+          content.sub!(/sha256 "[0-9a-f]{64}"/, %(sha256 "#{sha256}"))
+          content.sub!(/\n  bottle do\n.*?\n  end\n/m, "\n")
+          File.write(path, content)
+          RUBY
+
+      - name: Create pull request
+        if: steps.release.outputs.update == 'true'
+        id: pull-request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          branch="automation/acn-${VERSION}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --create "$branch"
+          git add Formula/acn.rb
+          git commit -m "feat: acn ${VERSION}"
+          git push --force-with-lease origin "HEAD:${branch}"
+
+          pull_request="$(gh pr list --head "$branch" --state open --json number --jq '.[0].number')"
+          if [[ -z "$pull_request" ]]; then
+            pull_request="$(gh pr create \
+              --base main \
+              --head "$branch" \
+              --title "feat: acn ${VERSION}" \
+              --body "由 update-acn workflow 自动更新。")"
+            pull_request="${pull_request##*/}"
+          fi
+
+          echo "number=${pull_request}" >> "$GITHUB_OUTPUT"
+          echo "branch=${branch}" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Start bottle builds
+        if: steps.release.outputs.update == 'true'
+        env:
+          BRANCH: ${{ steps.pull-request.outputs.branch }}
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ steps.pull-request.outputs.head_sha }}
+          PULL_REQUEST: ${{ steps.pull-request.outputs.number }}
+        run: |
+          gh workflow run tests.yml \
+            --ref "$BRANCH" \
+            -f pull_request="$PULL_REQUEST" \
+            -f head_sha="$HEAD_SHA"
