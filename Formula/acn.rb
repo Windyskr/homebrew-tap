@@ -3,16 +3,10 @@
 class Acn < Formula
   desc "Agent Completion Notification - Agent 任务完成通知（Claude Code / Codex → 飞书 / Bark）"
   homepage "https://github.com/windyskr/agent-completion-notification"
-  url "https://github.com/windyskr/agent-completion-notification/archive/refs/tags/v1.1.2.tar.gz"
-  sha256 "c0b5045f178c0555fc081550df0671f12af63dc385da26e642e39bd40a6433b7"
+  url "https://github.com/windyskr/agent-completion-notification/archive/refs/tags/v1.2.0.tar.gz"
+  sha256 "83e53081ea0258c481bfe42db6327ac4f08e14c37aad4d63b6fd5f3785b2e042"
   license "MIT"
   head "https://github.com/windyskr/agent-completion-notification.git", branch: "main"
-
-  bottle do
-    root_url "https://github.com/Windyskr/homebrew-tap/releases/download/acn-1.1.2"
-    sha256 cellar: :any_skip_relocation, arm64_tahoe:  "869f19efcc416d0ac91bbd887a2ed4b0edb55af5d4c15639bde54675899e26fe"
-    sha256 cellar: :any,                 x86_64_linux: "0b7d702fd0336cf749ac74e231e079f68581df6d37eb1403e727aeb9b3f789d8"
-  end
 
   depends_on "go" => :build
 
