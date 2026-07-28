@@ -67,3 +67,17 @@ jobs:
         with:
           name: bottles_${{ matrix.os }}
           path: '*.bottle.*'
+
+  publish:
+    if: github.event_name == 'workflow_dispatch'
+    needs: test-bot
+    permissions:
+      actions: read
+      checks: read
+      contents: write
+      issues: read
+      pull-requests: write
+    uses: ./.github/workflows/publish.yml
+    with:
+      pull_request: ${{ inputs.pull_request }}
+      head_sha: ${{ inputs.head_sha }}
