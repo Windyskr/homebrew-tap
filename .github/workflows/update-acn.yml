@@ -31,7 +31,7 @@ jobs:
 
           tag="$(gh api repos/Windyskr/agent-completion-notification/releases/latest --jq .tag_name)"
           version="${tag#v}"
-          current_version="$(ruby -ne 'puts Regexp.last_match(1) if match(%r{/tags/v([^/]+)\.tar\.gz})' Formula/acn.rb)"
+          current_version="$(ruby -e 'content = File.read(ARGV[0]); puts content[%r{/tags/v([^/]+)\.tar\.gz}, 1]' Formula/acn.rb)"
 
           if [[ "$version" == "$current_version" ]]; then
             update=false
