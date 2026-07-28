@@ -65,7 +65,7 @@ jobs:
             %(url "https://github.com/windyskr/agent-completion-notification/archive/refs/tags/#{tag}.tar.gz")
           )
           content.sub!(/sha256 "[0-9a-f]{64}"/, %(sha256 "#{sha256}"))
-          content.sub!(/\n  bottle do\n.*?\n  end\n/m, "\n")
+          content.sub!(/\n  bottle do\n.*?\n  end\n/m, "")
           File.write(path, content)
           RUBY
 
