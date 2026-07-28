@@ -31,15 +31,18 @@ jobs:
 
           tag="$(gh api repos/Windyskr/agent-completion-notification/releases/latest --jq .tag_name)"
           version="${tag#v}"
-          current_version="$(ruby -ne 'puts $1 if $_ =~ %r{/tags/v([^/]+)\.tar\.gz}' Formula/acn.rb)"
+          current_version="$(ruby -ne 'puts Regexp.last_match(1) if match(%r{/tags/v([^/]+)\.tar\.gz})' Formula/acn.rb)"
 
-          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
           if [[ "$version" == "$current_version" ]]; then
-            echo "update=false" >> "$GITHUB_OUTPUT"
+            update=false
           else
-            echo "update=true" >> "$GITHUB_OUTPUT"
+            update=true
           fi
+          {
+            echo "tag=${tag}"
+            echo "version=${version}"
+            echo "update=${update}"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Update formula
         if: steps.release.outputs.update == 'true'
@@ -93,9 +96,11 @@ jobs:
             pull_request="${pull_request##*/}"
           fi
 
-          echo "number=${pull_request}" >> "$GITHUB_OUTPUT"
-          echo "branch=${branch}" >> "$GITHUB_OUTPUT"
-          echo "head_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          {
+            echo "number=${pull_request}"
+            echo "branch=${branch}"
+            echo "head_sha=$(git rev-parse HEAD)"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Start bottle builds
         if: steps.release.outputs.update == 'true'
