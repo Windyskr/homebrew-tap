@@ -1,14 +1,6 @@
 name: brew pr-pull
 
 on:
-  workflow_call:
-    inputs:
-      pull_request:
-        required: true
-        type: string
-      head_sha:
-        required: false
-        type: string
   workflow_dispatch:
     inputs:
       pull_request:
