@@ -8,7 +8,6 @@ class Acn < Formula
   license "MIT"
   head "https://github.com/windyskr/agent-completion-notification.git", branch: "main"
 
-
   depends_on "go" => :build
 
   def install
